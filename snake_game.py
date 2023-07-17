@@ -1,14 +1,19 @@
-from tkinter import *
+try:
+    from tkinter import *
+except ImportError: # python 2 
+    from Tkinter import * # ignore warning
+
 import random
 
 GAME_WIDTH = 700
 GAME_HEIGHT = 700
-SPEED = 100
+SPEED = 100 # Initial Speed
 SPACE_SIZE = 50
-BODY_PARTS = 3
-SNAKE_COLOR = "#00FF00"
-FOOD_COLOR = "#FF0000"
-BACKGROUND_COLOR = "#000000"
+BODY_PARTS = 3 # Initial Body parts
+SNAKE_HEAD_COLOR = "DARK GREEN"
+SNAKE_COLOR = "#00FF00" # Green
+FOOD_COLOR = "#FF0000" # Red
+BACKGROUND_COLOR = "#000000" # Black
 
 
 class Snake:
@@ -18,10 +23,14 @@ class Snake:
         self.coordinates = []
         self.squares = []
 
-        for i in range(0, BODY_PARTS):
+        for _ in range(0, BODY_PARTS):
             self.coordinates.append([0, 0])
 
-        for x, y in self.coordinates:
+        for x, y in self.coordinates[:1]: # Make Head
+            square = canvas.create_rectangle(x, y, x + SPACE_SIZE, y + SPACE_SIZE, fill=SNAKE_HEAD_COLOR, tag="snake")
+            self.squares.append(square)
+
+        for x, y in self.coordinates[1:]:
             square = canvas.create_rectangle(x, y, x + SPACE_SIZE, y + SPACE_SIZE, fill=SNAKE_COLOR, tag="snake")
             self.squares.append(square)
 
@@ -51,9 +60,10 @@ def next_turn(snake, food):
     elif direction == "right":
         x += SPACE_SIZE
 
+    canvas.itemconfig(snake.squares[0], fill=SNAKE_COLOR)
     snake.coordinates.insert(0, (x, y))
 
-    square = canvas.create_rectangle(x, y, x + SPACE_SIZE, y + SPACE_SIZE, fill=SNAKE_COLOR)
+    square = canvas.create_rectangle(x, y, x + SPACE_SIZE, y + SPACE_SIZE, fill=SNAKE_HEAD_COLOR)
 
     snake.squares.insert(0, square)
 
@@ -81,7 +91,7 @@ def next_turn(snake, food):
         game_over()
 
     else:
-        window.after(SPEED, next_turn, snake, food)
+        mainWindow.after(SPEED, next_turn, snake, food)
 
 
 def change_direction(new_direction):
@@ -125,39 +135,39 @@ def game_over():
                        font=('consolas',70), text="GAME OVER", fill="red", tag="gameover")
 
 
-window = Tk()
-window.title("Snake game")
-window.resizable(False, False)
+mainWindow = Tk()
+mainWindow.title("Snake game")
+mainWindow.resizable(False, False)
 
 score = 0
 direction = 'down'
 
-label = Label(window, text="Score:{}".format(score), font=('consolas', 40))
+label = Label(mainWindow, text="Score:{}".format(score), font=('consolas', 40))
 label.pack()
 
-canvas = Canvas(window, bg=BACKGROUND_COLOR, height=GAME_HEIGHT, width=GAME_WIDTH)
+canvas = Canvas(mainWindow, bg=BACKGROUND_COLOR, height=GAME_HEIGHT, width=GAME_WIDTH)
 canvas.pack()
 
-window.update()
+mainWindow.update()
 
-window_width = window.winfo_width()
-window_height = window.winfo_height()
-screen_width = window.winfo_screenwidth()
-screen_height = window.winfo_screenheight()
+window_width = mainWindow.winfo_width()
+window_height = mainWindow.winfo_height()
+screen_width = mainWindow.winfo_screenwidth()
+screen_height = mainWindow.winfo_screenheight()
 
 x = int((screen_width/2) - (window_width/2))
-y = int((screen_height/2) - (window_height/2))
+y = int((screen_height/2) - (window_height/2)) - 35
 
-window.geometry(f"{window_width}x{window_height}+{x}+{y}")
+mainWindow.geometry(f"{window_width}x{window_height}+{x}+{y}")
 
-window.bind('<Left>', lambda event: change_direction('left'))
-window.bind('<Right>', lambda event: change_direction('right'))
-window.bind('<Up>', lambda event: change_direction('up'))
-window.bind('<Down>', lambda event: change_direction('down'))
+mainWindow.bind('<Left>', lambda event: change_direction('left'))
+mainWindow.bind('<Right>', lambda event: change_direction('right'))
+mainWindow.bind('<Up>', lambda event: change_direction('up'))
+mainWindow.bind('<Down>', lambda event: change_direction('down'))
 
 snake = Snake()
 food = Food()
 
 next_turn(snake, food)
 
-window.mainloop()
+mainWindow.mainloop()
