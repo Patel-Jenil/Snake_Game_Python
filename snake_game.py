@@ -30,7 +30,7 @@ class Snake:
             square = canvas.create_rectangle(x, y, x + SPACE_SIZE, y + SPACE_SIZE, fill=SNAKE_HEAD_COLOR, tag="snake")
             self.squares.append(square)
 
-        for x, y in self.coordinates[1:]:
+        for x, y in self.coordinates[1:]: # Make remaining Body
             square = canvas.create_rectangle(x, y, x + SPACE_SIZE, y + SPACE_SIZE, fill=SNAKE_COLOR, tag="snake")
             self.squares.append(square)
 
@@ -60,10 +60,10 @@ def next_turn(snake, food):
     elif direction == "right":
         x += SPACE_SIZE
 
-    canvas.itemconfig(snake.squares[0], fill=SNAKE_COLOR)
+    canvas.itemconfig(snake.squares[0], fill=SNAKE_COLOR) # Changing the cuurent Head color to Body color 
     snake.coordinates.insert(0, (x, y))
 
-    square = canvas.create_rectangle(x, y, x + SPACE_SIZE, y + SPACE_SIZE, fill=SNAKE_HEAD_COLOR)
+    square = canvas.create_rectangle(x, y, x + SPACE_SIZE, y + SPACE_SIZE, fill=SNAKE_HEAD_COLOR) # Adding new Head
 
     snake.squares.insert(0, square)
 
@@ -129,45 +129,74 @@ def check_collisions(snake):
 
 
 def game_over():
-
+    global new_game_button, exit_game_button
     canvas.delete(ALL)
-    canvas.create_text(canvas.winfo_width()/2, canvas.winfo_height()/2,
+    canvas.create_text(canvas.winfo_width()/2, canvas.winfo_height()/4,
                        font=('consolas',70), text="GAME OVER", fill="red", tag="gameover")
+    mainWindow.bind('<Return>', lambda event: new_game())
+    new_game_button = Button(canvas, text="New Game", font=('consolas',20), foreground='red', bg='grey', relief='raised' ,command=new_game)
+    new_game_button.place(relx=0.5, rely=0.4, anchor=CENTER)
+    exit_game_button = Button(canvas, text="Quit", font=('consolas',20), foreground='red', bg='grey', relief='raised' ,command=exit_game)
+    exit_game_button.place(relx=0.5, rely=0.5, anchor=CENTER)
+
+def new_game():
+    global score, canvas, direction, mainWindow
+    mainWindow.unbind("<Return>")
+    canvas.delete("gameover")
+    new_game_button.destroy()
+    exit_game_button.destroy()
+    
+    score = 0
+    direction = 'down'
+    snake = Snake()
+    food = Food()
+
+    next_turn(snake, food)
+
+    mainWindow.mainloop()
 
 
-mainWindow = Tk()
-mainWindow.title("Snake game")
-mainWindow.resizable(False, False)
+def exit_game():
+    mainWindow.destroy()
+    mainWindow.quit()
+    
 
-score = 0
-direction = 'down'
+if __name__ == '__main__':
+    mainWindow = Tk()
+    mainWindow.title("Snake game")
+    mainWindow.resizable(False, False)
 
-label = Label(mainWindow, text="Score:{}".format(score), font=('consolas', 40))
-label.pack()
+    score = 0
+    direction = 'down'
 
-canvas = Canvas(mainWindow, bg=BACKGROUND_COLOR, height=GAME_HEIGHT, width=GAME_WIDTH)
-canvas.pack()
+    label = Label(mainWindow, text="Score:{}".format(score), font=('consolas', 40))
+    label.pack()
 
-mainWindow.update()
+    canvas = Canvas(mainWindow, bg=BACKGROUND_COLOR, height=GAME_HEIGHT, width=GAME_WIDTH)
+    canvas.pack()
 
-window_width = mainWindow.winfo_width()
-window_height = mainWindow.winfo_height()
-screen_width = mainWindow.winfo_screenwidth()
-screen_height = mainWindow.winfo_screenheight()
+    mainWindow.update()
 
-x = int((screen_width/2) - (window_width/2))
-y = int((screen_height/2) - (window_height/2)) - 35
+    window_width = mainWindow.winfo_width()
+    window_height = mainWindow.winfo_height()
+    screen_width = mainWindow.winfo_screenwidth()
+    screen_height = mainWindow.winfo_screenheight()
 
-mainWindow.geometry(f"{window_width}x{window_height}+{x}+{y}")
+    x = int((screen_width/2) - (window_width/2))
+    y = int((screen_height/2) - (window_height/2)) - 35
 
-mainWindow.bind('<Left>', lambda event: change_direction('left'))
-mainWindow.bind('<Right>', lambda event: change_direction('right'))
-mainWindow.bind('<Up>', lambda event: change_direction('up'))
-mainWindow.bind('<Down>', lambda event: change_direction('down'))
+    mainWindow.geometry(f"{window_width}x{window_height}+{x}+{y}")
 
-snake = Snake()
-food = Food()
+    mainWindow.bind('<Left>', lambda event: change_direction('left'))
+    mainWindow.bind('<Right>', lambda event: change_direction('right'))
+    mainWindow.bind('<Up>', lambda event: change_direction('up'))
+    mainWindow.bind('<Down>', lambda event: change_direction('down'))
+    mainWindow.bind('<Return>', lambda event: new_game())
+    mainWindow.bind('<Escape>', lambda event: exit_game())
 
-next_turn(snake, food)
-
-mainWindow.mainloop()
+    new_game_button = Button(canvas, text="New Game", font=('consolas',20), foreground='red', bg='grey', relief='raised' ,command=new_game)
+    new_game_button.place(relx=0.5, rely=0.4, anchor=CENTER)
+    exit_game_button = Button(canvas, text="Quit", font=('consolas',20), foreground='red', bg='grey', relief='raised' ,command=exit_game)
+    exit_game_button.place(relx=0.5, rely=0.5, anchor=CENTER)
+    
+    mainWindow.mainloop()
